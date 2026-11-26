@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trend Quiz Arena</title>
+<!--
+  FILE GAME .HTML (chạy offline, 1 file duy nhất, không dùng CDN/ảnh/font ngoài) – giao diện kiểu Bamboozle
+  GAME #2 – TREND QUIZ ARENA (Wrap-up / Revision). Kỹ năng/tiêu chí: Writing Task 1 – LR (từ vựng xu hướng), GRA (After/Before + V-ing, followed by + noun, predicted/expected), CC (trình tự), TA (Introduction cho line chart có future predictions). Thời lượng: 8 phút ở lớp (chơi khoảng 10 câu); ngân hàng 30 câu cho tự luyện/ôn thêm. Vị trí: Stage 11 Wrap-up của lesson plan Writing Unit 14 (lớp CB, 120 phút).
+  CÁCH SỬA NỘI DUNG: chỉ sửa khối GAME_DATA ở đầu thẻ <script> bên dưới (câu hỏi, đáp án, số liệu biểu đồ, điểm các ô đặc biệt).
+  Không cần đụng vào phần code phía dưới dòng "ENGINE".
+-->
+<style>
+:root{--ink:#1f2340;--muted:#5b6082;--card:#fff;--navy:#1d4ed8;--teal:#0f766e;--good:#16a34a;--bad:#e11d48;--orange:#ff9f1c;--yellow:#ffd23f}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#eaf4ff,#d6e9ff);font-size:clamp(16px,1.5vw,21px);min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}
+#bar{background:linear-gradient(180deg,#ffd23f,#ffb11f);box-shadow:0 4px 0 #e08a00;padding:8px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.brand{font-weight:900;font-size:clamp(16px,1.8vw,24px);display:flex;align-items:center;gap:8px;color:#5a3a00;white-space:nowrap}
+.brand .logo{background:#fff;color:#e07a0f;border-radius:12px;padding:3px 10px;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+#teams{display:flex;gap:10px;flex:1;justify-content:center;flex-wrap:wrap}
+.tm{background:#fff7dd;color:#5a3a00;border-radius:16px;padding:6px 16px;min-width:130px;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.18);transition:transform .2s,background .2s}
+.tm .n{font-weight:800;font-size:.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.tm .s{font-weight:900;font-size:1.7em;line-height:1.05}
+.tm.cur{background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;transform:scale(1.08);box-shadow:0 4px 0 #0f2f8f}
+.tm.bump{animation:pop .5s}
+.rb{width:44px;height:44px;border-radius:50%;background:linear-gradient(180deg,#ff8a1f,#f2600c);color:#fff;font-size:1.15em;font-weight:900;box-shadow:0 4px 0 #b83d00;display:flex;align-items:center;justify-content:center}
+.rb:active{transform:translateY(3px);box-shadow:0 1px 0 #b83d00}
+#rbs{display:flex;gap:8px;margin-left:auto}
+#app{max-width:1200px;margin:0 auto;padding:16px 14px 30px}
+.card{background:var(--card);border-radius:24px;box-shadow:0 10px 30px rgba(31,35,64,.14);padding:clamp(14px,2.2vw,28px)}
+h1{margin:0 0 6px;font-size:clamp(26px,4vw,44px);line-height:1.05;color:var(--navy)}
+h2{margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 14px}
+.info{background:#fff8e1;border:2px dashed #ffc233;border-radius:16px;padding:10px 14px;font-size:.78em;color:#6b4f00;margin:10px 0 16px}
+.btn{background:#fff;color:var(--ink);border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:0 3px 0 rgba(31,35,64,.2);transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(31,35,64,.2)}
+.btn.big{font-size:1.15em;padding:12px 26px;color:#fff;background:linear-gradient(180deg,#3b82f6,#1d4ed8);box-shadow:0 5px 0 #0f2f8f}
+.btn.ok{font-size:1.2em;padding:12px 40px;color:#fff;background:linear-gradient(180deg,#34d058,#16a34a);box-shadow:0 5px 0 #0b6b2e;border-radius:16px}
+.btn.green{background:linear-gradient(180deg,#34d058,#16a34a);color:#fff;box-shadow:0 4px 0 #0b6b2e}
+.btn.off{opacity:.45;pointer-events:none}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:10px 0}
+.mode{border-radius:20px;padding:18px;color:#fff;text-align:left;box-shadow:0 6px 0 rgba(0,0,0,.18);transition:transform .1s}
+.mode:hover{transform:translateY(-3px)}
+.mode.m1{background:linear-gradient(180deg,#3b82f6,#1d4ed8)}.mode.m2{background:linear-gradient(180deg,#34d058,#16a34a)}
+.mode .t{font-size:1.25em;font-weight:900}.mode .d{font-size:.8em;opacity:.95}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+.seg button{background:#e6f0ff;color:var(--navy);padding:8px 16px;border-radius:12px;font-weight:800;margin-right:6px}
+.seg button.on{background:var(--navy);color:#fff}
+input[type=text]{font:inherit;padding:8px 12px;border-radius:12px;border:2px solid #cfe0ff;width:100%}
+input[type=range]{width:200px}
+.teamsetup{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:.78em;margin:6px 0}
+.legend span{background:#f1f5ff;border-radius:999px;padding:3px 12px;font-weight:700}
+/* board */
+#board{display:grid;grid-template-columns:repeat(var(--cols,6),1fr);gap:clamp(8px,1.2vw,16px)}
+.tile{aspect-ratio:1.35;border-radius:22px;color:#fff;font-weight:900;font-size:clamp(26px,4.2vw,56px);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 0 rgba(0,0,0,.2),inset 0 3px 0 rgba(255,255,255,.35);transition:transform .1s;text-shadow:0 3px 0 rgba(0,0,0,.18)}
+.tile.a{background:linear-gradient(180deg,#5aa9ff,#2f7de1)}.tile.b{background:linear-gradient(180deg,#3b82f6,#1e40af)}
+.tile:hover{transform:translateY(-3px) scale(1.03)}
+.tile.used{background:#c9d6ea;box-shadow:inset 0 3px 0 rgba(255,255,255,.5);color:#fff;pointer-events:none;text-shadow:none;font-size:clamp(22px,3.4vw,44px)}
+.tile.pick{animation:pop .5s}
+.boardhead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.turnbanner{font-weight:900;font-size:1.2em;color:var(--navy)}
+/* question */
+.qmeta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+.pill{background:#e6f0ff;color:var(--navy);font-weight:900;border-radius:999px;padding:4px 14px;font-size:.8em}
+.qn{color:var(--muted);font-weight:700;font-size:.85em}
+.timer{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:150px}
+.timer .bar{flex:1;height:12px;background:#e6efff;border-radius:99px;overflow:hidden}
+.timer .bar i{display:block;height:100%;background:linear-gradient(90deg,#34d058,#ffb11f,#ef4444);width:100%;transition:width .1s linear}
+.timer b{font-size:1.3em;min-width:2ch;text-align:right}
+.turn{font-weight:900;margin:0 0 6px;font-size:1.05em;color:var(--navy)}
+.prompt{font-size:clamp(20px,2.4vw,32px);font-weight:800;margin:4px 0 10px}
+.prompt small{display:block;font-size:.55em;color:var(--muted);font-weight:600;margin-top:4px}
+.visual{position:relative;text-align:center;margin:6px 0 12px}
+.visual svg{width:100%;max-width:700px;height:auto;background:linear-gradient(180deg,#fff,#f4f8ff);border-radius:18px;border:3px solid #dbe8ff}
+.replay{position:absolute;right:8px;top:8px;background:#fff;border-radius:12px;padding:4px 10px;font-weight:800;box-shadow:0 2px 0 rgba(0,0,0,.15);font-size:.7em}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:8px 0}
+.opt{position:relative;text-align:left;color:#fff;font-weight:800;font-size:1em;border-radius:18px;padding:14px 16px 14px 56px;min-height:64px;box-shadow:0 5px 0 rgba(0,0,0,.2);transition:transform .08s}
+.opt:hover{transform:translateY(-2px)}
+.opt .k{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:900}
+.opt:nth-child(1){background:#ef5b5b}.opt:nth-child(2){background:#2f7de1}.opt:nth-child(3){background:#1fae6b}.opt:nth-child(4){background:#f59e0b}
+.opt small{display:block;font-weight:600;opacity:.92;font-size:.72em}
+.opt.chart{padding:8px;color:var(--ink);background:#fff!important;border:4px solid #dbe8ff;text-align:center}
+.opt.chart .k{position:static;transform:none;margin:0 auto 4px;background:var(--navy);color:#fff;width:30px;height:30px}
+.opt.chart svg{width:100%;height:auto;background:#f4f8ff;border-radius:12px}
+.opt.good{outline:5px solid var(--good);animation:pop .5s}
+.opt.bad{outline:5px solid var(--bad);animation:shake .45s}
+.opt.dim{opacity:.45}.opt.locked{pointer-events:none}
+.gapbox{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.gapbox input{flex:1 1 320px;font-size:1.2em;border:3px solid #cfe0ff;border-radius:16px;padding:12px 16px}
+.gapbox input.good{border-color:var(--good);background:#eafff1;animation:pop .5s}
+.gapbox input.bad{border-color:var(--bad);background:#fff0f3;animation:shake .45s}
+.sentence{font-size:1.15em;line-height:1.7;background:#f4f8ff;border-radius:16px;padding:12px 16px;margin:6px 0}
+.sentence .blank{display:inline-block;min-width:110px;border-bottom:4px solid var(--navy);text-align:center;color:var(--navy);font-weight:900}
+.fb{min-height:1.6em;font-weight:800;margin:6px 0}
+.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
+.explain{background:#eef6ff;border-left:6px solid #2f7de1;border-radius:12px;padding:8px 12px;font-size:.85em;margin:6px 0;display:none}
+.explain.show{display:block;animation:pop .4s}
+.hintbox{background:#fff8e1;border-radius:12px;padding:8px 12px;font-size:.85em;display:none;margin:6px 0}
+.hintbox.show{display:block}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:8px}
+/* modal (Bamboozle-style) */
+.overlay{position:fixed;inset:0;background:rgba(15,30,70,.6);z-index:40;display:flex;align-items:center;justify-content:center;padding:18px}
+.modal{background:#fff;border-radius:26px;width:min(560px,100%);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:pop .4s;text-align:center}
+.modal .mh{background:linear-gradient(180deg,#34d058,#16a34a);height:46px}
+.modal.bad .mh{background:linear-gradient(180deg,#f87171,#dc2626)}
+.modal.round .mh{background:linear-gradient(180deg,#3b82f6,#1d4ed8)}
+.modal .mb{padding:20px 24px 26px}
+.modal .ic{width:min(220px,50vw);height:min(220px,50vw);margin:-4px auto 10px;border-radius:30px;background:#e0f7ef;display:flex;align-items:center;justify-content:center;font-size:clamp(80px,14vw,130px);line-height:1}
+.modal.bad .ic{background:#ffe4e6}.modal.round .ic{background:#e0ecff}
+.modal .ic span{display:inline-block;animation:wob 1.4s ease-in-out infinite}
+.modal h3{margin:6px 0 4px;font-size:clamp(26px,4vw,40px);color:#0f766e;font-weight:900}
+.modal.bad h3{color:#be123c}.modal.round h3{color:var(--navy)}
+.modal p{margin:6px 0 14px;color:var(--muted);font-weight:600}
+.picker{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0 4px}
+.picker button{color:#fff;font-weight:900;border-radius:16px;padding:12px 22px;box-shadow:0 5px 0 rgba(0,0,0,.25);min-width:140px}
+.picker button small{display:block;font-weight:700;opacity:.9}
+.end .podium{display:flex;gap:12px;justify-content:center;align-items:flex-end;margin:16px 0;flex-wrap:wrap}
+.end .pod{color:#fff;border-radius:18px 18px 0 0;padding:10px 18px;text-align:center;min-width:130px;font-weight:900}
+.end .pod .n{font-size:2em}
+.review{text-align:left;max-height:260px;overflow:auto;font-size:.8em}
+.review div{padding:6px 8px;border-bottom:1px solid #eee}
+.confetti{position:fixed;top:-30px;font-size:28px;z-index:60;animation:fall linear forwards;pointer-events:none}
+@keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes wob{0%,100%{transform:rotate(-6deg) scale(1)}50%{transform:rotate(6deg) scale(1.08)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadein{to{opacity:1}}
+@keyframes ring{0%{r:7;opacity:.9}100%{r:20;opacity:0}}
+@media (max-width:640px){.timer{min-width:100%;order:5}.opt{padding-left:52px}.tm{min-width:90px;padding:4px 8px}#board{--cols:4!important}}
+</style>
+</head>
+<body>
+<header id="bar">
+  <div class="brand"><span class="logo">🏆 UNIT 14</span><span id="brandTitle">Trend Quiz Arena</span></div>
+  <div id="teams"></div>
+  <div id="rbs">
+    <button class="rb" id="btnEdit" title="Edit team names" style="display:none">✎</button>
+    <button class="rb" id="btnSound" title="Sound on/off">🔊</button>
+    <button class="rb" id="btnFull" title="Fullscreen">⛶</button>
+    <button class="rb" id="btnRestart" title="Close / back to menu">✕</button>
+  </div>
+</header>
+<div id="app"><main id="screen"></main></div>
+<script>
+/* =====================================================================
+   GAME_DATA  –  CHỈ SỬA PHẦN NÀY ĐỂ ĐỔI NỘI DUNG
+   - meta: tiêu đề + ghi chú giáo viên (hiện ở màn hình mở đầu)
+   - specials: điểm của các ô đặc biệt (thêm điểm / mất điểm / cho đội khác / lấy từ đội khác),
+               ratio = tỉ lệ ô đặc biệt so với số câu hỏi (0.2 = khoảng 1 ô đặc biệt cho 5 câu)
+   - rounds[].questions[]: type = "choice" (chọn đáp án) | "gap" (gõ đáp án)
+       choice: options = [..] (chuỗi) HOẶC [{chart:{values:[...]}}], answer = số thứ tự đúng (bắt đầu từ 0)
+       gap:    sentence có "____" là chỗ trống, accept = [các đáp án chấp nhận], không phân biệt hoa/thường
+       chart (tuỳ chọn): {title, xlabels:[..], values:[..], ymax, ytitle, forecastFrom: chỉ số bắt đầu dự báo}
+       hint (gợi ý tiếng Việt), explain (giải thích sau khi trả lời)
+   ===================================================================== */
+const GAME_DATA = {
+ "meta": {
+  "title": "Trend Quiz Arena 🏆",
+  "subtitle": "Vocabulary, structures, introductions and predictions: 30 questions, 5 rounds.",
+  "skill": "Writing Task 1 – LR, GRA, CC, TA (approx. band 5.5)",
+  "duration": "8 phút ở lớp (khoảng 10 câu); 30 câu cho tự luyện",
+  "stage": "Stage 11 – Wrap-up / Revision",
+  "teacherNote": "Class mode kiểu Bamboozle: mỗi đội chọn 1 ô số, lượt đổi sau MỖI ô; khoảng 20% ô bất ngờ (⭐ thêm điểm, 💣 mất 10–20, 🎁 cho đội khác, 🧲 lấy từ đội khác; chỉnh trong GAME_DATA.specials). Đúng +10, sai 0. Ngân hàng 30 câu, 5 round. Ở lớp chọn \"Questions to play\" = 10 (game tự rút đều từ các round); chọn \"All 30\" cho HS tự luyện ở nhà/lớp. Câu dạng gõ (gap) chấp nhận nhiều đáp án, không phân biệt hoa/thường. Sửa nội dung ở khối GAME_DATA."
+ },
+ "defaultTimer": 20,
+ "defaultClassQ": 10,
+ "defaultSoloQ": 30,
+ "rounds": [
+  {
+   "title": "Word Power",
+   "icon": "💪",
+   "instructions": "Choose or type the correct word or phrase.",
+   "questions": [
+    {
+     "type": "choice",
+     "prompt": "Sales increased ____ in 2015.",
+     "options": [
+      "sharp",
+      "sharply",
+      "sharpness"
+     ],
+     "answer": 1,
+     "explain": "Verb + adverb: increased sharply.",
+     "hint": "Sau động từ cần loại từ nào?"
+    },
+    {
+     "type": "gap",
+     "prompt": "Type an adjective meaning a BIG change.",
+     "sentence": "There was a ____ rise in the number of members.",
+     "accept": [
+      "sharp",
+      "considerable",
+      "significant"
+     ],
+     "explain": "Adjective + noun: a sharp / considerable / significant rise.",
+     "hint": "3 đáp án đều được chấp nhận."
+    },
+    {
+     "type": "gap",
+     "prompt": "Complete the phrase with the correct preposition.",
+     "sentence": "The number reached a peak ____ 80 in 2014.",
+     "accept": [
+      "of"
+     ],
+     "explain": "reach a peak OF + number.",
+     "hint": "reach a peak ... 80",
+     "chart": {
+      "title": "Students in Ms Giang's classes, Mind Space",
+      "xlabels": [
+       "2010",
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020"
+      ],
+      "values": [
+       40,
+       45,
+       80,
+       30,
+       40,
+       55
+      ],
+      "ymax": 100,
+      "showValues": true,
+      "ytitle": "Students"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "There was a ____ in the number of visitors.",
+     "options": [
+      "decline",
+      "declined",
+      "declining"
+     ],
+     "answer": 0,
+     "explain": "After \"a\", we need a noun: a decline.",
+     "hint": "Sau \"There was a\" cần danh từ."
+    },
+    {
+     "type": "choice",
+     "prompt": "Which phrase means \"almost no change\"?",
+     "options": [
+      "remain relatively stable",
+      "increase significantly",
+      "hit a low",
+      "fluctuate"
+     ],
+     "answer": 0,
+     "explain": "remain relatively stable = almost no change.",
+     "hint": "relatively = tương đối."
+    },
+    {
+     "type": "gap",
+     "prompt": "Type an adverb for a SMALL or SLOW change.",
+     "sentence": "Unemployment decreased ____ over ten years.",
+     "accept": [
+      "gradually",
+      "steadily",
+      "slightly"
+     ],
+     "explain": "Small / slow change: slightly, gradually, steadily.",
+     "hint": "3 đáp án đều được chấp nhận."
+    }
+   ]
+  },
+  {
+   "title": "Chart Detective",
+   "icon": "🔍",
+   "instructions": "Look at the dynamic chart. Choose or type the best answer.",
+   "questions": [
+    {
+     "type": "choice",
+     "prompt": "Which sentence is correct for 2012–2014?",
+     "options": [
+      "The number of students dropped sharply to 80 in 2014.",
+      "The number of students rose sharply to 80 in 2014.",
+      "The number of students remained stable at 80 in 2014."
+     ],
+     "answer": 1,
+     "explain": "45 → 80 is a big rise: rose sharply.",
+     "hint": "Đường đi lên hay xuống?",
+     "chart": {
+      "title": "Students in Ms Giang's classes, Mind Space",
+      "xlabels": [
+       "2010",
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020"
+      ],
+      "values": [
+       40,
+       45,
+       80,
+       30,
+       40,
+       55
+      ],
+      "ymax": 100,
+      "showValues": true,
+      "ytitle": "Students"
+     }
+    },
+    {
+     "type": "gap",
+     "prompt": "Complete the sentence about the chart.",
+     "sentence": "In 2016, the number of students hit a ____ of 30.",
+     "accept": [
+      "low"
+     ],
+     "explain": "hit a low of + number (the lowest point).",
+     "hint": "Điểm thấp nhất.",
+     "chart": {
+      "title": "Students in Ms Giang's classes, Mind Space",
+      "xlabels": [
+       "2010",
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020"
+      ],
+      "values": [
+       40,
+       45,
+       80,
+       30,
+       40,
+       55
+      ],
+      "ymax": 100,
+      "showValues": true,
+      "ytitle": "Students"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "What happened to Mind Space Gym members between 2012 and 2014?",
+     "options": [
+      "They remained unchanged at 500.",
+      "They rose slightly to 500.",
+      "They dropped to 500."
+     ],
+     "answer": 0,
+     "explain": "The line is flat: remained unchanged at 500.",
+     "hint": "Hai điểm đầu bằng nhau.",
+     "chart": {
+      "title": "Members of Mind Space Gym",
+      "xlabels": [
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020",
+       "2022",
+       "2024"
+      ],
+      "values": [
+       500,
+       500,
+       1200,
+       2000,
+       800,
+       1000,
+       1300
+      ],
+      "ymax": 2500,
+      "showValues": true,
+      "ytitle": "Members"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence describes the dashed line (after 2020)?",
+     "options": [
+      "Sales are expected to rise to 400 thousand by 2040.",
+      "Sales rose to 400 thousand in 2040.",
+      "Sales are predicted to remain stable."
+     ],
+     "answer": 0,
+     "explain": "Dashed line = future → predicted / expected to + V.",
+     "hint": "Đường đứt nét là tương lai.",
+     "chart": {
+      "title": "Electric car sales in Zeeland (thousands)",
+      "xlabels": [
+       "2000",
+       "2005",
+       "2010",
+       "2015",
+       "2020",
+       "2025",
+       "2030",
+       "2035",
+       "2040"
+      ],
+      "values": [
+       20,
+       35,
+       60,
+       95,
+       150,
+       200,
+       260,
+       330,
+       400
+      ],
+      "ymax": 450,
+      "forecastFrom": 4,
+      "showValues": true,
+      "ytitle": "Thousands"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence is correct for 2016–2020?",
+     "options": [
+      "The number of students grew steadily to 55.",
+      "The number of students dropped sharply to 55.",
+      "The number of students remained stable at 55."
+     ],
+     "answer": 0,
+     "explain": "30 → 40 → 55: a steady rise.",
+     "hint": "Sau điểm thấp nhất, đường đi lên.",
+     "chart": {
+      "title": "Students in Ms Giang's classes, Mind Space",
+      "xlabels": [
+       "2010",
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020"
+      ],
+      "values": [
+       40,
+       45,
+       80,
+       30,
+       40,
+       55
+      ],
+      "ymax": 100,
+      "showValues": true,
+      "ytitle": "Students"
+     }
+    },
+    {
+     "type": "gap",
+     "prompt": "Complete the sentence about the chart.",
+     "sentence": "The number of members reached a ____ of 2,000 in 2018.",
+     "accept": [
+      "peak"
+     ],
+     "explain": "reach a peak of + number (the highest point).",
+     "hint": "Điểm cao nhất.",
+     "chart": {
+      "title": "Members of Mind Space Gym",
+      "xlabels": [
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020",
+       "2022",
+       "2024"
+      ],
+      "values": [
+       500,
+       500,
+       1200,
+       2000,
+       800,
+       1000,
+       1300
+      ],
+      "ymax": 2500,
+      "showValues": true,
+      "ytitle": "Members"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence is correct for 2016–2018?",
+     "options": [
+      "The number of members rose sharply from 1,200 to 2,000.",
+      "The number of members dropped from 1,200 to 2,000.",
+      "The number of members remained unchanged at 1,200."
+     ],
+     "answer": 0,
+     "explain": "1,200 → 2,000 is a big rise: rose sharply.",
+     "hint": "Đường đi lên.",
+     "chart": {
+      "title": "Members of Mind Space Gym",
+      "xlabels": [
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020",
+       "2022",
+       "2024"
+      ],
+      "values": [
+       500,
+       500,
+       1200,
+       2000,
+       800,
+       1000,
+       1300
+      ],
+      "ymax": 2500,
+      "showValues": true,
+      "ytitle": "Members"
+     }
+    }
+   ]
+  },
+  {
+   "title": "Structure Lab",
+   "icon": "🧪",
+   "instructions": "Pick the correct grammar. Watch V-ing and nouns!",
+   "questions": [
+    {
+     "type": "choice",
+     "prompt": "After ____ sharply to 80, the number of students dropped.",
+     "options": [
+      "rise",
+      "rising",
+      "rose"
+     ],
+     "answer": 1,
+     "explain": "After + V-ing: After rising…",
+     "hint": "After + ...?"
+    },
+    {
+     "type": "gap",
+     "prompt": "Type a NOUN (not a verb).",
+     "sentence": "The number peaked at 80, followed by a sharp ____ to 30.",
+     "accept": [
+      "drop",
+      "decline",
+      "decrease"
+     ],
+     "explain": "followed by + noun phrase: a sharp drop / decline / decrease.",
+     "hint": "followed by a sharp + (danh từ)"
+    },
+    {
+     "type": "choice",
+     "prompt": "Before ____ to 30 in 2016, the number reached a peak of 80.",
+     "options": [
+      "dropping",
+      "dropped",
+      "drop"
+     ],
+     "answer": 0,
+     "explain": "Before + V-ing: Before dropping…",
+     "hint": "Before + V-ing"
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence is correct?",
+     "options": [
+      "The number rose sharply, followed by dropped to 30.",
+      "The number rose sharply, and then it dropped to 30.",
+      "The number rose sharply, and then drop to 30."
+     ],
+     "answer": 1,
+     "explain": "S V O, and then S V O. (followed by + noun, not a verb)",
+     "hint": "Sau and then cần một mệnh đề đầy đủ."
+    },
+    {
+     "type": "gap",
+     "prompt": "Write the correct form of \"rise\".",
+     "sentence": "After ____ sharply to 2,000 in 2018, the number of members dropped to 800 in 2020.",
+     "accept": [
+      "rising"
+     ],
+     "explain": "After + V-ing: After rising…",
+     "hint": "After + V-ing",
+     "chart": {
+      "title": "Members of Mind Space Gym",
+      "xlabels": [
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020",
+       "2022",
+       "2024"
+      ],
+      "values": [
+       500,
+       500,
+       1200,
+       2000,
+       800,
+       1000,
+       1300
+      ],
+      "ymax": 2500,
+      "showValues": true,
+      "ytitle": "Members"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence is correct?",
+     "options": [
+      "After a sharp rise to 80, the number of students dropped.",
+      "After a sharp rise to 80, dropped.",
+      "After sharp rise to 80, the number of students dropped."
+     ],
+     "answer": 0,
+     "explain": "After + a / an + adjective + noun, S V O.",
+     "hint": "Cần mạo từ a và chủ ngữ ở mệnh đề chính."
+    },
+    {
+     "type": "gap",
+     "prompt": "Type one word.",
+     "sentence": "The number of members hit a low of 800 in 2020, ____ by a steady rise to 1,300.",
+     "accept": [
+      "followed"
+     ],
+     "explain": "S V O, followed by + noun phrase.",
+     "hint": "follow + -ed",
+     "chart": {
+      "title": "Members of Mind Space Gym",
+      "xlabels": [
+       "2012",
+       "2014",
+       "2016",
+       "2018",
+       "2020",
+       "2022",
+       "2024"
+      ],
+      "values": [
+       500,
+       500,
+       1200,
+       2000,
+       800,
+       1000,
+       1300
+      ],
+      "ymax": 2500,
+      "showValues": true,
+      "ytitle": "Members"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence has a MISTAKE?",
+     "options": [
+      "After rising to 80, the number dropped.",
+      "Before dropping to 30, the number reached a peak.",
+      "Before dropped to 30, the number reached a peak."
+     ],
+     "answer": 2,
+     "explain": "Before + V-ing: Before dropping… (not \"dropped\").",
+     "hint": "Tìm dạng động từ sai sau Before."
+    }
+   ]
+  },
+  {
+   "title": "Intro Builder",
+   "icon": "🧱",
+   "instructions": "Build an introduction for a line graph WITH future predictions.",
+   "questions": [
+    {
+     "type": "choice",
+     "prompt": "Question: \"The line graph shows the number of cars sold in Zeeland from 2000 to 2020, with forecasts to 2040.\" Which is the best introduction?",
+     "options": [
+      "The given graph illustrates how many cars were sold in Zeeland between 2000 and 2020, with future predictions to 2040.",
+      "The line graph shows the number of cars sold in Zeeland from 2000 to 2020, with forecasts to 2040.",
+      "The given graph illustrates how many cars sold in Zeeland between 2000 to 2020, with future predictions to 2040."
+     ],
+     "answer": 0,
+     "explain": "Paraphrase (do not copy) + correct grammar: how many cars were sold; between … and ….",
+     "hint": "Đáp án không được copy đề và phải đúng ngữ pháp.",
+     "chart": {
+      "title": "Electric car sales in Zeeland (thousands)",
+      "xlabels": [
+       "2000",
+       "2005",
+       "2010",
+       "2015",
+       "2020",
+       "2025",
+       "2030",
+       "2035",
+       "2040"
+      ],
+      "values": [
+       20,
+       35,
+       60,
+       95,
+       150,
+       200,
+       260,
+       330,
+       400
+      ],
+      "ymax": 450,
+      "forecastFrom": 4,
+      "showValues": true,
+      "ytitle": "Thousands"
+     }
+    },
+    {
+     "type": "gap",
+     "prompt": "Type one word.",
+     "sentence": "The graph illustrates ____ many cars were sold in Zeeland.",
+     "accept": [
+      "how"
+     ],
+     "explain": "the number of … → how many … were sold.",
+     "hint": "the number of → how many",
+     "chart": {
+      "title": "Electric car sales in Zeeland (thousands)",
+      "xlabels": [
+       "2000",
+       "2005",
+       "2010",
+       "2015",
+       "2020",
+       "2025",
+       "2030",
+       "2035",
+       "2040"
+      ],
+      "values": [
+       20,
+       35,
+       60,
+       95,
+       150,
+       200,
+       260,
+       330,
+       400
+      ],
+      "ymax": 450,
+      "forecastFrom": 4,
+      "showValues": true,
+      "ytitle": "Thousands"
+     }
+    },
+    {
+     "type": "gap",
+     "prompt": "Type one word.",
+     "sentence": "The graph illustrates how many cars were sold in Zeeland ____ 2000 and 2020.",
+     "accept": [
+      "between"
+     ],
+     "explain": "from … to … → between … and ….",
+     "hint": "from 2000 to 2020 → ... 2000 and 2020",
+     "chart": {
+      "title": "Electric car sales in Zeeland (thousands)",
+      "xlabels": [
+       "2000",
+       "2005",
+       "2010",
+       "2015",
+       "2020",
+       "2025",
+       "2030",
+       "2035",
+       "2040"
+      ],
+      "values": [
+       20,
+       35,
+       60,
+       95,
+       150,
+       200,
+       260,
+       330,
+       400
+      ],
+      "ymax": 450,
+      "forecastFrom": 4,
+      "showValues": true,
+      "ytitle": "Thousands"
+     }
+    },
+    {
+     "type": "gap",
+     "prompt": "Type a noun.",
+     "sentence": "…, with future ____ to 2040.",
+     "accept": [
+      "predictions",
+      "forecasts"
+     ],
+     "explain": "forecasts → future predictions / future forecasts.",
+     "hint": "Dạng số nhiều",
+     "chart": {
+      "title": "Electric car sales in Zeeland (thousands)",
+      "xlabels": [
+       "2000",
+       "2005",
+       "2010",
+       "2015",
+       "2020",
+       "2025",
+       "2030",
+       "2035",
+       "2040"
+      ],
+      "values": [
+       20,
+       35,
+       60,
+       95,
+       150,
+       200,
+       260,
+       330,
+       400
+      ],
+      "ymax": 450,
+      "forecastFrom": 4,
+      "showValues": true,
+      "ytitle": "Thousands"
+     }
+    },
+    {
+     "type": "choice",
+     "prompt": "Which one is NOT a good way to paraphrase \"shows\" in an introduction?",
+     "options": [
+      "illustrates",
+      "gives information about",
+      "reaches"
+     ],
+     "answer": 2,
+     "explain": "illustrates / gives information about = shows. reaches is used for numbers, not for a chart.",
+     "hint": "Chart + verb: động từ nào hợp với biểu đồ?"
+    }
+   ]
+  },
+  {
+   "title": "Future Zone",
+   "icon": "🔮",
+   "instructions": "Talk about the future like a pro.",
+   "questions": [
+    {
+     "type": "choice",
+     "prompt": "It is ____ that sales will continue to rise.",
+     "options": [
+      "predicted",
+      "predicting",
+      "predict"
+     ],
+     "answer": 0,
+     "explain": "It is predicted / forecast / expected that + will + V.",
+     "hint": "It is + (quá khứ phân từ)"
+    },
+    {
+     "type": "gap",
+     "prompt": "Type one word.",
+     "sentence": "Electric car sales are expected ____ rise until 2040.",
+     "accept": [
+      "to"
+     ],
+     "explain": "S + be predicted / expected + TO + V.",
+     "hint": "expected ... + V"
+    },
+    {
+     "type": "choice",
+     "prompt": "Which sentence has a MISTAKE?",
+     "options": [
+      "It is forecast that prices will drop.",
+      "Prices are predicted will drop.",
+      "Prices are expected to drop."
+     ],
+     "answer": 1,
+     "explain": "Structure 2 needs \"to + V\": Prices are predicted TO drop.",
+     "hint": "Tìm câu thiếu \"to\"."
+    },
+    {
+     "type": "gap",
+     "prompt": "Type a word that means \"expected\".",
+     "sentence": "It is ____ that the number will keep rising.",
+     "accept": [
+      "predicted",
+      "forecast",
+      "expected"
+     ],
+     "explain": "predicted / forecast / expected are all correct.",
+     "hint": "3 đáp án đều được chấp nhận."
+    }
+   ]
+  }
+ ]
+};
+/* ===================================================================== ENGINE ===================================================================== */
+(function(){
+'use strict';
+const D = GAME_DATA, $ = (s,r)=>(r||document).querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TEAM_COLORS = ['#ef5b5b','#2f7de1','#1fae6b','#f59e0b'];
+const SP = Object.assign({ratio:0.2,add:[10,15,20],lose:[10,15,20],give:[10,15,20],take:[10,15,20]}, D.specials||{});
+const S = {mode:null,nTeams:3,names:['Team 1','Team 2','Team 3','Team 4'],timer:D.defaultTimer||25,nq:0,special:true,sound:true,list:[],tiles:[],qi:0,cur:0,scores:[],score:0,streak:0,best:0,answered:false,left:0,iv:null,wrong:[],right:0,open:-1,locked:false};
+
+/* ---------- audio (WebAudio) ---------- */
+let AC=null;
+function ctx(){ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended'&&AC.resume) AC.resume(); return AC; }
+function tone(f,d,type,vol,when,f2){ if(!S.sound) return; try{ const a=ctx(),o=a.createOscillator(),g=a.createGain(); o.type=type||'sine'; const t=a.currentTime+(when||0); o.frequency.setValueAtTime(f,t); if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+d); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||.15,t+.015); g.gain.exponentialRampToValueAtTime(0.0001,t+d); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+d+.05);}catch(e){} }
+function noise(d,vol,cut,when){ if(!S.sound) return; try{ const a=ctx(),n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0); for(let i=0;i<n;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2); const s=a.createBufferSource(); s.buffer=b; const lp=a.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=cut||700; const g=a.createGain(); g.gain.value=vol||.5; s.connect(lp); lp.connect(g); g.connect(a.destination); s.start(a.currentTime+(when||0)); }catch(e){} }
+const sfx={
+  good(){[523,659,784].forEach((f,i)=>tone(f,.18,'triangle',.18,i*.09));},
+  bad(){tone(180,.3,'sawtooth',.12);tone(130,.35,'sawtooth',.1,.12);},
+  chime(){[784,988,1175,1568,1976].forEach((f,i)=>{tone(f,.55,'sine',.16,i*.1);tone(f*2,.35,'sine',.04,i*.1);});},
+  bomb(){noise(.9,.9,520);tone(140,.7,'sine',.5,0,35);tone(70,.9,'triangle',.4,.02,30);},
+  tick(){tone(900,.05,'square',.05);}, click(){tone(600,.04,'triangle',.08);},
+  win(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.25,'triangle',.18,i*.12));},
+  start(){[392,523,659].forEach((f,i)=>tone(f,.15,'triangle',.15,i*.08));}
+};
+
+function chartSVG(c, mini){
+  const W=mini?240:680, H=mini?140:360;
+  const m=mini?{l:12,r:12,t:12,b:12}:{l:64,r:26,t:52,b:58};
+  const v=c.values, n=v.length;
+  const ymin=c.ymin!=null?c.ymin:0;
+  let ymax=c.ymax; if(ymax==null){ ymax=Math.max.apply(null,v); ymax=Math.ceil(ymax*1.15/10)*10; }
+  const X=i=>m.l+(W-m.l-m.r)*(0.04+0.92*(n===1?.5:i/(n-1)));
+  const Y=val=>H-m.b-(H-m.t-m.b)*(val-ymin)/(ymax-ymin);
+  const ff=(c.forecastFrom!=null&&c.forecastFrom<n)?c.forecastFrom:null;
+  const lastA=ff!=null?ff:n-1; // đoạn nét liền tới chỉ số này
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(c.title||'line chart')+'">';
+  if(ff!=null){ s+='<rect x="'+X(ff)+'" y="'+m.t+'" width="'+(W-m.r-X(ff))+'" height="'+(H-m.t-m.b)+'" fill="#ffe8a3" opacity=".55"/>'; if(!mini) s+='<text x="'+((X(ff)+W-m.r)/2)+'" y="'+(m.t+18)+'" text-anchor="middle" font-size="15" font-weight="800" fill="#b45309">FORECAST</text>'; }
+  if(!mini){
+    const steps=4;
+    for(let k=0;k<=steps;k++){ const val=ymin+(ymax-ymin)*k/steps, y=Y(val); s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="#dfe3ff" stroke-width="1.5" stroke-dasharray="4 5"/><text x="'+(m.l-8)+'" y="'+(y+5)+'" text-anchor="end" font-size="15" fill="#5b6082">'+(Math.round(val*10)/10)+'</text>'; }
+    s+='<line x1="'+m.l+'" x2="'+m.l+'" y1="'+m.t+'" y2="'+(H-m.b)+'" stroke="#9aa0d0" stroke-width="2"/><line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(H-m.b)+'" y2="'+(H-m.b)+'" stroke="#9aa0d0" stroke-width="2"/>';
+    if(c.title) s+='<text x="'+(W/2)+'" y="26" text-anchor="middle" font-size="19" font-weight="900" fill="#1f2340">'+esc(c.title)+'</text>';
+    if(c.ytitle) s+='<text transform="translate(16 '+((H-m.b+m.t)/2)+') rotate(-90)" text-anchor="middle" font-size="14" fill="#5b6082">'+esc(c.ytitle)+'</text>';
+    (c.xlabels||[]).forEach((l,i)=>{ s+='<text x="'+X(i)+'" y="'+(H-m.b+24)+'" text-anchor="middle" font-size="15" fill="#5b6082">'+esc(l)+'</text>'; });
+  } else {
+    s+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="none"/>';
+    for(let k=1;k<4;k++){ const y=m.t+(H-m.t-m.b)*k/4; s+='<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="#e3e7ff" stroke-width="1.5"/>'; }
+  }
+  const col=c.color||'#7c3aed', sw=mini?5:6;
+  let d='',len=0; for(let i=0;i<=lastA;i++){ d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v[i]).toFixed(1)+' '; if(i) len+=Math.hypot(X(i)-X(i-1),Y(v[i])-Y(v[i-1])); }
+  len=Math.ceil(len)+4;
+  const dur=mini?1.1:1.8;
+  s+='<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:'+len+';stroke-dashoffset:'+len+';animation:draw '+dur+'s ease-out .15s forwards"/>';
+  if(ff!=null){ let d2=''; for(let i=ff;i<n;i++) d2+=(i===ff?'M':'L')+X(i).toFixed(1)+' '+Y(v[i]).toFixed(1)+' ';
+    s+='<path d="'+d2+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-dasharray="10 8" stroke-linecap="round" style="opacity:0;animation:fadein .6s ease-out '+(dur+.2)+'s forwards"/>'; }
+  const pc=['#ff5d8f','#ff9f1c','#2ec27e','#2f8cff'];
+  for(let i=0;i<n;i++){ const del=(0.15+dur*(i/Math.max(1,n-1))).toFixed(2); const hollow=ff!=null&&i>ff;
+    s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v[i]).toFixed(1)+'" r="'+(mini?5:8)+'" fill="'+(hollow?'#fff':pc[i%4])+'" stroke="'+(hollow?col:'#fff')+'" stroke-width="'+(hollow?3:3)+'" style="opacity:0;animation:fadein .3s ease-out '+del+'s forwards"/>';
+    if(c.showValues&&!mini) s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(v[i])-14).toFixed(1)+'" text-anchor="middle" font-size="15" font-weight="800" fill="#1f2340" style="opacity:0;animation:fadein .3s ease-out '+del+'s forwards">'+v[i]+'</text>'; }
+  if(c.mark!=null&&!mini){ s+='<circle cx="'+X(c.mark).toFixed(1)+'" cy="'+Y(v[c.mark]).toFixed(1)+'" r="7" fill="none" stroke="#e11d48" stroke-width="4" style="animation:ring 1.3s ease-out 2.2s infinite"/>'; }
+  return s+'</svg>';
+}
+
+
+/* ---------- helpers ---------- */
+function norm(t){ return String(t||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[.!?,;]+$/g,'').replace(/\s+/g,' ').trim(); }
+function evaluate(q,given){ if(q.type==='gap'){ const g=norm(given); return !!g && q.accept.some(a=>norm(a)===g); } return given===q.answer; }
+function shuffle(a){ for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); const t=a[k]; a[k]=a[j]; a[j]=t; } return a; }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function buildList(n){
+  const all=D.rounds.map((r,ri)=>r.questions.map(q=>Object.assign({},q,{ri:ri,rtitle:r.title})));
+  const total=all.reduce((a,r)=>a+r.length,0);
+  if(!n||n>=total){ S.list=[].concat.apply([],all); return; }
+  const c=all.map(r=>Math.floor(n*r.length/total)); let rem=n-c.reduce((a,b)=>a+b,0);
+  all.map((r,i)=>({i:i,f:n*r.length/total-c[i]})).sort((a,b)=>b.f-a.f).slice(0,rem).forEach(o=>c[o.i]++);
+  S.list=[];
+  all.forEach((r,i)=>{ const idx=shuffle(r.map((_,j)=>j)); idx.slice(0,c[i]).sort((a,b)=>a-b).forEach(j=>S.list.push(r[j])); });
+}
+function buildTiles(){
+  const t=S.list.map(q=>({kind:'q',q:q,used:false}));
+  if(S.special){
+    const k=Math.max(2,Math.round(S.list.length*SP.ratio));
+    const kinds=shuffle(['add','lose','give','take']); // vòng lặp đều 4 loại
+    for(let i=0;i<k;i++){ const kind=kinds[i%4]; t.push({kind:kind,val:pick(SP[kind]),used:false}); }
+  }
+  S.tiles=shuffle(t);
+}
+function ansText(q){ if(q.type==='gap') return q.accept[0]; const o=q.options[q.answer]; return (typeof o==='object'&&o.chart)?('Chart '+'ABCDEF'[q.answer]):(typeof o==='object'?o.text:o); }
+function teamName(i){ return (S.names[i]||'').trim()||('Team '+(i+1)); }
+function confetti(n){ const em=['🎉','⭐','✨','🏆','📈','🎊']; for(let i=0;i<(n||40);i++){ const e=document.createElement('div'); e.className='confetti'; e.textContent=em[i%em.length]; e.style.left=Math.random()*100+'vw'; e.style.animationDuration=(2+Math.random()*2.5)+'s'; e.style.animationDelay=(Math.random()*.8)+'s'; document.body.appendChild(e); setTimeout(()=>e.remove(),6000); } }
+function stopTimer(){ if(S.iv){ clearInterval(S.iv); S.iv=null; } }
+function closeModals(){ document.querySelectorAll('.overlay').forEach(o=>o.remove()); S.locked=false; }
+
+/* ---------- top bar ---------- */
+let lastScores=[];
+function renderBar(){
+  const t=$('#teams'); let h='';
+  if(S.mode==='class'){
+    for(let i=0;i<S.nTeams;i++) h+='<div class="tm'+(i===S.cur?' cur':'')+(lastScores[i]!==undefined&&lastScores[i]!==S.scores[i]?' bump':'')+'" data-team="'+i+'"><div class="n">'+esc(teamName(i))+'</div><div class="s">'+S.scores[i]+'</div></div>';
+    lastScores=S.scores.slice();
+  } else if(S.mode==='solo'&&S.list.length){
+    h='<div class="tm cur"><div class="n">Score</div><div class="s" id="sc">'+S.score+'</div></div><div class="tm"><div class="n">Streak 🔥</div><div class="s">'+S.streak+'</div></div>';
+  }
+  t.innerHTML=h; $('#btnEdit').style.display=(S.mode==='class'&&S.scores.length)?'':'none';
+}
+
+/* ---------- modal ---------- */
+function modal(o){
+  closeModals(); S.locked=true;
+  const ov=document.createElement('div'); ov.className='overlay';
+  ov.innerHTML='<div class="modal '+(o.cls||'')+'"><div class="mh"></div><div class="mb"><div class="ic"><span>'+o.icon+'</span></div><h3>'+esc(o.title)+'</h3><p>'+(o.text||'')+'</p>'+(o.body||'')+(o.ok===false?'':'<button class="btn ok" id="mok">'+(o.okText||'✓ Okay!')+'</button>')+'</div></div>';
+  document.body.appendChild(ov);
+  const b=$('#mok',ov); if(b) b.onclick=()=>{ sfx.click(); ov.remove(); S.locked=false; if(o.onOk) o.onOk(); };
+  return ov;
+}
+
+/* ---------- screens ---------- */
+function showSetup(){
+  stopTimer(); closeModals(); S.mode=null; S.scores=[]; S.list=[]; lastScores=[]; renderBar();
+  const m=D.meta;
+  $('#screen').innerHTML=
+  '<div class="card"><h1>'+esc(m.title)+'</h1><p class="sub">'+esc(m.subtitle)+'</p>'+
+  '<div class="info"><b>Ghi chú giáo viên:</b> Kỹ năng/tiêu chí: <b>'+esc(m.skill)+'</b> · Thời lượng: <b>'+esc(m.duration)+'</b> · Vị trí trong lesson plan: <b>'+esc(m.stage)+'</b><br>'+esc(m.teacherNote||'')+'</div>'+
+  '<div class="modes"><button class="mode m1" id="mClass"><div class="t">👥 Class mode</div><div class="d">2–4 teams. Pick a numbered tile each turn. Turns alternate after EVERY tile. Watch out for surprise tiles!</div></button>'+
+  '<button class="mode m2" id="mSolo"><div class="t">🧑‍🎓 Solo practice</div><div class="d">Instant feedback, score and a review at the end.</div></button></div>'+
+  '<div id="cfg"></div></div>';
+  $('#mClass').onclick=()=>{S.mode='class';S.nq=D.defaultClassQ||10;sfx.click();renderCfg();};
+  $('#mSolo').onclick=()=>{S.mode='solo';S.nq=D.defaultSoloQ||30;sfx.click();renderCfg();};
+}
+function renderCfg(){
+  const total=D.rounds.reduce((a,r)=>a+r.questions.length,0);
+  let h='<h2>Setup</h2>';
+  if(S.mode==='class'){
+    h+='<div class="row seg" id="segT"><b>Teams:</b> ';
+    [2,3,4].forEach(n=>{ h+='<button data-n="'+n+'" class="'+(S.nTeams===n?'on':'')+'">'+n+'</button>'; });
+    h+='</div><div class="teamsetup">';
+    for(let i=0;i<S.nTeams;i++) h+='<div style="background:'+TEAM_COLORS[i]+';border-radius:14px;padding:8px"><input type="text" data-t="'+i+'" maxlength="16" value="'+esc(S.names[i])+'"></div>';
+    h+='</div>';
+  }
+  h+='<div class="row seg" id="segQ"><b>Questions:</b> ';
+  [10,15,20,total,Math.min(S.nq,total)].filter((v,i,a)=>v<=total&&a.indexOf(v)===i).sort((x,y)=>x-y).forEach(n=>{ h+='<button data-q="'+n+'" class="'+((S.nq>=total?total:S.nq)===n?'on':'')+'">'+(n===total?'All '+n:n)+'</button>'; });
+  h+='</div>';
+  if(S.mode==='class') h+='<div class="row seg" id="segS"><b>Surprise tiles:</b> <button data-s="1" class="'+(S.special?'on':'')+'">On</button><button data-s="0" class="'+(!S.special?'on':'')+'">Off</button></div><div class="legend"><span>⭐ Win points</span><span>💣 Lose points</span><span>🎁 Give points to a team</span><span>🧲 Take points from a team</span></div>';
+  h+='<div class="row"><b>Time per question:</b> <input type="range" id="tm" min="10" max="90" step="5" value="'+S.timer+'"><b id="tmv">'+S.timer+'s</b></div>';
+  h+='<div class="row"><button class="btn big" id="go">▶ Start game</button> <button class="btn" id="back">← Back</button></div>';
+  $('#cfg').innerHTML=h;
+  document.querySelectorAll('#segT button').forEach(b=>b.onclick=()=>{S.nTeams=+b.dataset.n;sfx.click();renderCfg();});
+  document.querySelectorAll('#segQ button').forEach(b=>b.onclick=()=>{S.nq=+b.dataset.q;sfx.click();renderCfg();});
+  document.querySelectorAll('#segS button').forEach(b=>b.onclick=()=>{S.special=b.dataset.s==='1';sfx.click();renderCfg();});
+  document.querySelectorAll('[data-t]').forEach(i=>i.oninput=()=>{S.names[+i.dataset.t]=i.value;});
+  $('#tm').oninput=e=>{S.timer=+e.target.value;$('#tmv').textContent=S.timer+'s';};
+  $('#go').onclick=startGame; $('#back').onclick=showSetup;
+}
+function startGame(){
+  closeModals(); buildList(S.nq); S.qi=0;S.cur=0;S.score=0;S.streak=0;S.best=0;S.wrong=[];S.right=0;S.open=-1;
+  S.scores=new Array(S.nTeams).fill(0); lastScores=S.scores.slice(); sfx.start();
+  if(S.mode==='class'){ buildTiles(); renderBoard(); } else { renderBar(); soloNext(); }
+}
+
+/* ---------- class: board ---------- */
+function renderBoard(){
+  stopTimer(); renderBar();
+  const left=S.tiles.filter(t=>!t.used).length;
+  if(!left) return showEnd();
+  const cols=S.tiles.length>=30?6:5;
+  let h='<div class="boardhead"><div class="turnbanner" style="color:'+TEAM_COLORS[S.cur]+'">▶ '+esc(teamName(S.cur))+', pick a tile!</div><div><span class="pill">Tiles left: '+left+' / '+S.tiles.length+'</span> <button class="btn" id="endg">🏁 End game</button></div></div><div id="board" style="--cols:'+cols+'">';
+  S.tiles.forEach((t,i)=>{ const ico={q:'✓',add:'⭐',lose:'💣',give:'🎁',take:'🧲'}[t.kind]; h+='<button class="tile '+(i%2?'b':'a')+(t.used?' used':'')+'" data-i="'+i+'">'+(t.used?ico:(i+1))+'</button>'; });
+  h+='</div>';
+  $('#screen').innerHTML=h;
+  document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>pickTile(+b.dataset.i));
+  $('#endg').onclick=()=>{ sfx.click(); showEnd(); };
+}
+function pickTile(i){
+  if(S.locked) return; const t=S.tiles[i]; if(!t||t.used) return; sfx.click(); S.open=i; t.used=true;
+  if(t.kind==='q'){ S.current=t.q; renderQuestion(t.q,i); beginTimer(); }
+  else special(t);
+}
+function endTurn(){ S.cur=(S.cur+1)%S.nTeams; S.open=-1; S.current=null; renderBoard(); }
+function special(t){
+  const me=S.cur, v=t.val, me_n=esc(teamName(me));
+  if(t.kind==='add'){ S.scores[me]+=v; sfx.chime(); renderBar();
+    modal({icon:'⭐',title:'Win '+v+' points!',text:'<b>'+me_n+'</b> gets +'+v+' points. Lucky!',onOk:endTurn}); }
+  else if(t.kind==='lose'){ const a=Math.min(v,S.scores[me]); S.scores[me]-=a; sfx.bomb(); renderBar();
+    modal({icon:'💣',cls:'bad',title:'Lose '+v+' points!',text:a?'<b>'+me_n+'</b> loses '+a+' points. Boom!':'<b>'+me_n+'</b> has no points to lose. Phew!',onOk:endTurn}); }
+  else { const give=t.kind==='give'; let body='<div class="picker">';
+    for(let k=0;k<S.nTeams;k++) if(k!==me) body+='<button data-k="'+k+'" style="background:'+TEAM_COLORS[k]+'">'+esc(teamName(k))+'<small>'+S.scores[k]+' pts</small></button>';
+    body+='</div>';
+    const ov=modal({icon:give?'🎁':'🧲',cls:give?'bad':'',title:(give?'Give ':'Take ')+v+' points!',text:give?'<b>'+me_n+'</b>: choose a team to give '+v+' points to.':'<b>'+me_n+'</b>: choose a team to take '+v+' points from.',body:body,ok:false});
+    ov.querySelectorAll('.picker button').forEach(b=>b.onclick=()=>{ const k=+b.dataset.k; sfx.click(); let a;
+      if(give){ a=Math.min(v,S.scores[me]); S.scores[me]-=a; S.scores[k]+=a; sfx.bomb(); }
+      else { a=Math.min(v,S.scores[k]); S.scores[k]-=a; S.scores[me]+=a; sfx.chime(); }
+      renderBar(); ov.remove(); S.locked=false;
+      modal({icon:give?'🎁':'🧲',cls:give?'bad':'',title:give?'Gift sent!':'Points stolen!',text:give?(a?'<b>'+me_n+'</b> gave <b>'+a+'</b> points to <b>'+esc(teamName(k))+'</b>.':'<b>'+me_n+'</b> has no points to give.'):(a?'<b>'+me_n+'</b> took <b>'+a+'</b> points from <b>'+esc(teamName(k))+'</b>.':'<b>'+esc(teamName(k))+'</b> has no points to take.'),onOk:endTurn}); }); }
+}
+
+/* ---------- solo flow ---------- */
+function soloNext(){
+  if(S.qi>=S.list.length) return showEnd();
+  const q=S.list[S.qi];
+  if(S.qi===0||q.ri!==S.list[S.qi-1].ri){ const r=D.rounds[q.ri]; S.current=q; renderQuestion(q,null);
+    modal({cls:'round',icon:r.icon||'🎯',title:'Round '+(q.ri+1)+': '+r.title,text:esc(r.instructions||''),okText:'Go! →',onOk:beginTimer}); }
+  else { renderQuestion(q,null); beginTimer(); }
+}
+
+/* ---------- question view (dùng chung) ---------- */
+function renderQuestion(q,tileIdx){
+  S.answered=false; S.left=S.timer; S.current=q; renderBar();
+  let h='<div class="card q"><div class="qmeta">'+(tileIdx!=null?'<span class="pill">Tile '+(tileIdx+1)+'</span>':'')+'<span class="pill">Round '+(q.ri+1)+' · '+esc(q.rtitle)+'</span>'+(S.mode==='solo'?'<span class="qn">Question '+(S.qi+1)+' / '+S.list.length+'</span>':'')+'<div class="timer"><div class="bar"><i id="tbar"></i></div><b id="tnum">'+S.timer+'</b></div></div>';
+  if(S.mode==='class') h+='<p class="turn" style="color:'+TEAM_COLORS[S.cur]+'">▶ '+esc(teamName(S.cur))+', your turn!</p>';
+  h+='<div class="prompt">'+esc(q.prompt)+(q.promptVi?'<small>'+esc(q.promptVi)+'</small>':'')+'</div>';
+  if(q.sentence) h+='<div class="sentence">'+esc(q.sentence).replace(/_{2,}/g,'<span class="blank">&nbsp;&nbsp;?&nbsp;&nbsp;</span>')+'</div>';
+  if(q.chart) h+='<div class="visual" id="vis">'+chartSVG(q.chart,false)+'<button class="replay" id="rp">↻ Replay</button></div>';
+  if(q.type==='gap') h+='<div class="gapbox"><input id="gi" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer…"><button class="btn green" id="chk">Check ✓</button></div>';
+  else { h+='<div class="opts" id="opts">'; q.options.forEach((o,i)=>{ if(typeof o==='object'&&o.chart) h+='<button class="opt chart" data-i="'+i+'"><div class="k">'+'ABCDEF'[i]+'</div>'+chartSVG(o.chart,true)+'</button>'; else h+='<button class="opt" data-i="'+i+'"><span class="k">'+'ABCDEF'[i]+'</span>'+esc(typeof o==='object'?o.text:o)+(typeof o==='object'&&o.vi?'<small>'+esc(o.vi)+'</small>':'')+'</button>'; }); h+='</div>'; }
+  h+='<div class="fb" id="fb"></div><div class="explain" id="ex"></div><div class="hintbox" id="hb">💡 '+esc(q.hint||'')+'</div>';
+  h+='<div class="actions">'+(q.hint?'<button class="btn" id="hint">💡 Hint</button>':'')+(S.mode==='class'?'<button class="btn" id="rev">👁 Reveal</button>':'')+'<button class="btn big off" id="next">Next →</button></div></div>';
+  $('#screen').innerHTML=h;
+  const rp=$('#rp'); if(rp) rp.onclick=()=>{ $('#vis').innerHTML=chartSVG(q.chart,false)+'<button class="replay" id="rp">↻ Replay</button>'; $('#rp').onclick=rp.onclick; sfx.click(); };
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+  if(q.type==='gap'){ const gi=$('#gi'); $('#chk').onclick=()=>answer(gi.value); gi.onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault(); if(!S.answered) answer(gi.value); else go();} }; setTimeout(()=>gi.focus(),50); }
+  const hb=$('#hint'); if(hb) hb.onclick=()=>{ $('#hb').classList.add('show'); sfx.click(); };
+  const rv=$('#rev'); if(rv) rv.onclick=()=>{ if(!S.answered) finish(q,null,'reveal'); };
+  $('#next').onclick=go;
+}
+function beginTimer(){
+  stopTimer(); const q=S.current; if(!q||S.answered) return; S.left=S.timer; const t0=Date.now(); let lastSec=Math.ceil(S.left);
+  S.iv=setInterval(()=>{ if(S.answered){stopTimer();return;} const el=(Date.now()-t0)/1000; S.left=Math.max(0,S.timer-el); const bar=$('#tbar'),num=$('#tnum'); if(bar) bar.style.width=(S.left/S.timer*100)+'%'; const sec=Math.ceil(S.left); if(num) num.textContent=sec; if(sec!==lastSec){ lastSec=sec; if(sec<=5&&sec>0) sfx.tick(); } if(S.left<=0){ finish(q,null,'timeout'); } },100);
+}
+function answer(given){ if(S.answered||S.locked) return; const q=S.current; if(q.type==='gap'&&!String(given).trim()) return; finish(q,given,'answer'); }
+function finish(q,given,how){
+  if(S.answered) return; S.answered=true; stopTimer();
+  const ok = how==='answer' && evaluate(q,given);
+  const fb=$('#fb'), ex=$('#ex'); let pts=0;
+  if(ok){ pts=(q.points||10)+(S.mode==='solo'?Math.round(5*(S.left/S.timer)):0); sfx.good(); S.right++; S.streak++; S.best=Math.max(S.best,S.streak); }
+  else { if(how==='answer') sfx.bad(); S.streak=0; if(S.mode==='solo'||how!=='reveal') S.wrong.push(q); }
+  if(S.mode==='class'){ if(ok) S.scores[S.cur]+=pts; } else if(ok) S.score+=pts;
+  if(q.type==='gap'){ const gi=$('#gi'); gi.classList.add(ok?'good':'bad'); gi.readOnly=true; $('#chk').classList.add('off'); }
+  else document.querySelectorAll('.opt').forEach((b,i)=>{ b.classList.add('locked'); if(i===q.answer) b.classList.add('good'); else if(how==='answer'&&i===given) b.classList.add('bad'); else b.classList.add('dim'); });
+  const ct=ansText(q);
+  if(ok){ fb.className='fb good'; fb.textContent='✅ Correct! +'+pts+' points'; }
+  else if(how==='timeout'){ fb.className='fb bad'; fb.textContent="⏰ Time's up! Answer: "+ct; }
+  else if(how==='reveal'){ fb.className='fb'; fb.textContent='👁 Answer: '+ct; }
+  else { fb.className='fb bad'; fb.textContent='❌ Not quite. Answer: '+ct; }
+  if(q.explain){ ex.textContent=q.explain; ex.classList.add('show'); }
+  renderBar();
+  $('#next').classList.remove('off');
+  const lastOne = S.mode==='solo' ? S.qi===S.list.length-1 : S.tiles.filter(t=>!t.used).length===0;
+  if(lastOne) $('#next').textContent='Finish 🏁';
+}
+function go(){ if(!S.answered||S.locked) return; sfx.click(); if(S.mode==='class') endTurn(); else { S.qi++; soloNext(); } }
+function showEnd(){
+  stopTimer(); closeModals(); sfx.win(); confetti(60); renderBar();
+  let h='<div class="card end"><h1>🏁 Game over!</h1>';
+  if(S.mode==='class'){
+    const order=S.scores.map((s,i)=>({s:s,i:i})).sort((a,b)=>b.s-a.s); const top=order[0].s; const winners=order.filter(o=>o.s===top);
+    h+='<p class="sub">'+(winners.length>1?'It\'s a tie! (play 1 tie-break question) ':'Winner: ')+winners.map(w=>esc(teamName(w.i))).join(' & ')+' 🏆</p><div class="podium">';
+    order.forEach((o,k)=>{ h+='<div class="pod" style="background:'+TEAM_COLORS[o.i]+';height:'+(90+(order.length-k)*28)+'px"><div>'+(['🥇','🥈','🥉','4th'][k])+'</div>'+esc(teamName(o.i))+'<div class="n">'+o.s+'</div></div>'; });
+    h+='</div>';
+  } else {
+    const total=S.list.length, acc=Math.round(100*S.right/total);
+    h+='<p class="sub">Score: <b>'+S.score+'</b> · Correct: <b>'+S.right+'/'+total+'</b> ('+acc+'%) · Best streak: <b>'+S.best+'</b> 🔥</p>';
+    if(S.wrong.length){ h+='<h2>Review your mistakes</h2><div class="review">'; S.wrong.forEach(q=>{ h+='<div><b>'+esc(q.prompt)+'</b>'+(q.sentence?' '+esc(q.sentence):'')+' → <b style="color:var(--good)">'+esc(ansText(q))+'</b>'+(q.explain?'<br><small>'+esc(q.explain)+'</small>':'')+'</div>'; }); h+='</div>'; }
+  }
+  h+='<div class="row" style="justify-content:center"><button class="btn big" id="again">↺ Play again</button><button class="btn" id="menu">Menu</button></div></div>';
+  $('#screen').innerHTML=h; $('#again').onclick=startGame; $('#menu').onclick=showSetup;
+}
+/* ---------- controls ---------- */
+$('#btnSound').onclick=()=>{ S.sound=!S.sound; $('#btnSound').textContent=S.sound?'🔊':'🔇'; if(S.sound) sfx.click(); };
+$('#btnFull').onclick=()=>{ const d=document.documentElement; if(!document.fullscreenElement) (d.requestFullscreen||function(){}).call(d); else document.exitFullscreen&&document.exitFullscreen(); };
+$('#btnRestart').onclick=()=>{ stopTimer(); showSetup(); };
+$('#btnEdit').onclick=()=>{ if(S.locked) return; let body='<div class="teamsetup" style="margin:10px 0">'; for(let i=0;i<S.nTeams;i++) body+='<div style="background:'+TEAM_COLORS[i]+';border-radius:14px;padding:8px"><input type="text" data-e="'+i+'" maxlength="16" value="'+esc(S.names[i])+'"></div>'; body+='</div>';
+  const ov=modal({icon:'✏️',title:'Edit team names',text:'',body:body,onOk:()=>{ renderBar(); if(S.open<0&&S.mode==='class') renderBoard(); }});
+  ov.querySelectorAll('[data-e]').forEach(i=>i.oninput=()=>{ S.names[+i.dataset.e]=i.value; }); };
+document.addEventListener('keydown',e=>{ if(e.target&&e.target.tagName==='INPUT') return; if(e.key==='Enter'){ const m=$('#mok'); if(m){ m.click(); return; } if(S.answered&&$('#next')) go(); } });
+window.__GAME={S:S,evaluate:evaluate,norm:norm,pickTile:pickTile};
+showSetup();
+})();
+</script>
+</body>
+</html>
